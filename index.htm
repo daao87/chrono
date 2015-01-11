@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head><title>Cronómetro</title><meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="mystyle.css">
+<link rel="stylesheet" type="text/css" href="m-styles.min.css">
+<script type="text/javascript" src="zepto.min.js" > </script>
+<script type="text/javascript" src="touch.js" ></script>
+<script type="text/javascript">
+  $(function(){
+    localStorage.c = (localStorage.c || "0.00");
+	localStorage.lista = (localStorage.lista || "");
+
+    var t, cl = $("#crono");
+	var lista = $("#lista");
+	var listArray = localStorage.lista === "" ? new Array() : JSON.parse(localStorage.lista);
+	var i = $('#crono');
+
+    i.on('tap', function(){ cambiar(); });
+    i.on('swipe', function() { if(t === undefined) inicializar(); });
+    
+	function incr()     {
+		localStorage.c = +localStorage.c + 0.01;
+	}
+    function mostrar()  { 
+		cl.html((+localStorage.c).toFixed(2));	
+		var cadena = "";
+		for(var i=0; i<listArray.length; i++) {
+			cadena += i+1 + ". <strong>" + listArray[i] + "</strong><br>";
+		}
+		lista.html(cadena);
+	};
+    function arrancar() {
+		t=setInterval(function(){
+			incr();
+			mostrar()
+			}, 10);
+		$("#cambiar").html('Parar');
+		$("#cambiar").removeClass("blue").addClass("red");
+		$('#inicializar').removeClass("blue").attr('disabled','disabled');
+	};
+    function parar()    {
+		clearInterval(t); 
+		t=undefined;
+		listArray.push((+localStorage.c).toFixed(2));
+		localStorage.lista = JSON.stringify(listArray);
+		mostrar();
+		$("#cambiar").html('Arrancar');
+		$("#cambiar").removeClass("red").addClass("blue");
+		$("#inicializar").addClass("blue").removeAttr('disabled');
+	};
+    function cambiar()  {
+		if (!t) arrancar();
+		else parar();
+	};
+	function inicializar() {
+		localStorage.c="0.00";
+		localStorage.lista = "";
+		listArray = [];
+		mostrar();
+	};
+    $("#cambiar").on('click', cambiar);
+    $("#inicializar").on('click', inicializar);
+    mostrar();
+  });
+</script>
+</head>
+<body>
+<h1>Cronómetro</h1>
+
+<h2><div id="crono"> 0.0 </div></h2>
+
+<button type="button" id="cambiar" class="m-btn blue" style="width: 80px;"> Arrancar </button>
+<button type="button" id="inicializar" class="m-btn blue">  Inicializar </button>
+<br><br>
+<div id="lista"></div>
+</body>
+</html>
